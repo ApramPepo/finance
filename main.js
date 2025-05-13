@@ -36,23 +36,23 @@ class Expense extends Transaction {
 
 class FinanceManager {
     constructor() {
-        this.Transaction = []; 
+        this.transaction = []; 
     }
 
-    addTransaction(Transaction) {
-        this.Transaction.push(Transaction);
+    addTransaction(transaction) {
+        this.transaction.push(transaction);
     }
 
     getTotalExp() {
-        return this.Transaction
+        return this.transaction
             .filter(t => t.type === 'expense')
             .reduce((sum, t) => sum + t.amount, 0);
     }
 
     getTotalIncome() {
-        return this.Transaction
+        return this.transaction
             .filter(t => t.type === 'income')
-            .reduce((sum, t) => sume + t.amount, 0);
+            .reduce((sum, t) => sum + t.amount, 0);
     }
 
     getBalance() {
@@ -63,3 +63,47 @@ class FinanceManager {
         return this.Transaction;
     }
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    const financeManager = new FinanceManager();
+    const form = document.getElementById('transaction');
+    const transactionList = document.getElementById('list');
+    const totalIncome = document.getElementById('total-income');
+    const totalExpenses = document.getElementById('total-expense');
+    const balance = document.getElementById('balance');
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const type = document.getElementById('type').value;
+        const amount = document.getElementById('amount').value;
+        const description = document.getElementById('desc').value;
+        const category = document.getElementById('category').value;
+
+        let transaction;
+
+        if(type === 'income') {
+            transaction = new Income(amount, description, category);
+        } else {
+            transaction = new Expense(amount, description, category)
+        }
+
+        financeManager.addTransaction(transaction);
+        summary();
+        addTransactionToList(transaction);
+
+        form.reset();
+    });
+
+    function summary() {
+        totalIncome.textContent = financeManager.getTotalIncome().toFixed(2);
+        totalExpenses.textContent = financeManager.getTotalExp().toFixed(2);
+        balance.textContent = financeManager.getBalance().toFixed(2);
+    }
+
+    function addTransactionToList(transaction) {
+        const li = document.createElement('li');
+        li.className = `transaction-itm ${transaction.type}`;
+        li.textContent = transaction.getDetails();
+        transactionList.prepend(li);
+    }
+});
